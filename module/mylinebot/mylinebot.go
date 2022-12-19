@@ -3,11 +3,11 @@ package mylinebot
 import (
 	"context"
 	"fmt"
-	"log"
-	"openai-line-bot/env"
-
 	"github.com/PullRequestInc/go-gpt3"
 	"github.com/line/line-bot-sdk-go/linebot"
+	"log"
+	"openai-line-bot/env"
+	"strings"
 )
 
 func LineBotTemplate(events []*linebot.Event) {
@@ -20,18 +20,21 @@ func LineBotTemplate(events []*linebot.Event) {
 				if err != nil {
 					log.Println("Quota err:", err)
 				}
+				log.Println("receive message :: ", message.Text)
+
+				if !strings.Contains(message.Text, "@bot") {
+					log.Println("dont container @bot , just return")
+					continue
+				}
 				// 將訊息丟給OpenAI
 				openAIresp := requestOpenAI(message.Text)
-				// message.ID: Msg unique ID
-				// message.Text: Msg text
-				// 官方預設回覆
-				// if _, err := env.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("msg ID:"+message.ID+":"+"Get:"+message.Text+" , \n OK! remain message:"+strconv.FormatInt(quota.Value, 10))).Do(); err != nil {
-				// 	log.Print(err)
-				// }
+
 				// 回覆同樣的訊息
-				// if _, err = env.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.Text)).Do(); err != nil {
-				// 	log.Print(err)
-				// }
+				//if _, err = env.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.Text)).Do(); err != nil {
+				//	log.Print(err)
+				//}
+
+				log.Println("send message :: ", openAIresp[0:5])
 				// 回覆OpenAI回應的訊息
 				if _, err = env.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(openAIresp)).Do(); err != nil {
 					log.Print(err)
@@ -55,12 +58,20 @@ func requestOpenAI(line_Message string) string {
 	ctx := context.Background()
 	resp, err := env.MyOpenAI.CompletionWithEngine(ctx, "text-davinci-003", gpt3.CompletionRequest{
 		Prompt:    []string{line_Message},
-		MaxTokens: gpt3.IntPtr(150),
-		Stop:      []string{"."},
-		Echo:      false,
+		MaxTokens: gpt3.IntPtr(512),
+		//Stop:      []string{"."},
+		//Echo:      false,
 	})
+
 	if err != nil {
 		log.Fatalln(err)
 	}
 	return resp.Choices[0].Text
+	//log.Println("get raw from ai:: ", resp.Choices[0].Text)
+	//res1 := strings.Split(, "\r\n")
+	//if len(res1) > 1 {
+	//	return res1[1]
+	//}
+	//
+	//return res1[0]
 }

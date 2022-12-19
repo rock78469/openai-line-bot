@@ -1,0 +1,7 @@
+version: "2"
+authtoken: 2J7IhJuSGe4dIDEK6dckXti5iNU_6tXU9xBRy6tJsC5maRbp8
+
+tunnels:
+  aibot:
+    proto: http
+    addr: host.docker.internal:8833

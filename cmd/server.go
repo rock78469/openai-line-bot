@@ -36,6 +36,7 @@ func start() {
 	env.Gpt3Conn()
 
 	ginServer := gin.New()
+	ginServer.SetTrustedProxies(nil)
 	ginServer.POST("/callback", mybot.NewStart)
 	ginServer.Run(":8833")
 }
