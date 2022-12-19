@@ -1,0 +1,14 @@
+**/.git
+**/.DS_Store
+**/node_modules
+**/vendor
+*.log
+Dockerfile*
+docker-compose*
+.dockerignore
+.git
+.gitignore
+.vscode
+**/logs
+matchengine/runtime
+matchengine/vendor
