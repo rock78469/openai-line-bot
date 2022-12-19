@@ -2,7 +2,6 @@ package mylinebot
 
 import (
 	"context"
-	"fmt"
 	"github.com/PullRequestInc/go-gpt3"
 	"github.com/line/line-bot-sdk-go/linebot"
 	"log"
@@ -39,16 +38,16 @@ func LineBotTemplate(events []*linebot.Event) {
 				if _, err = env.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(openAIresp)).Do(); err != nil {
 					log.Print(err)
 				}
-			case *linebot.StickerMessage:
-				var kw string
-				for _, k := range message.Keywords {
-					kw = kw + "," + k
-				}
-
-				outStickerResult := fmt.Sprintf("收到貼圖訊息: %s, pkg: %s kw: %s", message.StickerID, message.PackageID, kw)
-				if _, err := env.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(outStickerResult)).Do(); err != nil {
-					log.Print(err)
-				}
+				//case *linebot.StickerMessage:
+				//	var kw string
+				//	for _, k := range message.Keywords {
+				//		kw = kw + "," + k
+				//	}
+				//
+				//	outStickerResult := fmt.Sprintf("收到貼圖訊息: %s, pkg: %s kw: %s", message.StickerID, message.PackageID, kw)
+				//	if _, err := env.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(outStickerResult)).Do(); err != nil {
+				//		log.Print(err)
+				//	}
 			}
 		}
 	}
