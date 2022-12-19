@@ -1,0 +1,32 @@
+version: '3.5'
+services:
+  ngrok:
+    restart: unless-stopped
+    image: ngrok/ngrok
+    environment:
+      APP_NAME: ${APP_NAME:-openai-line-bot}
+      APP_ENV: ${APP_ENV:-local}
+      TZ: Asia/Taipei
+    ports:
+      - "80:4040"
+    networks:
+      - internal
+  aibot:
+    restart: unless-stopped
+    image: aibot:${APP_ENV:-local}
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        APP_NAME: ${APP_NAME:-openai-line-bot}
+    environment:
+      APP_NAME: ${APP_NAME:-openai-line-bot}
+      APP_ENV: ${APP_ENV:-local}
+      TZ: Asia/Taipei
+    networks:
+      - internal
+networks:
+  internal:
+    name: ${NETWORKS:-internal}
+    driver: bridge
+
