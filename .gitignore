@@ -1,0 +1,14 @@
+#IDE ignore
+/.wing/
+/.vscode/
+/.idea/
+/.vs/
+
+#project ignore
+Logs/
+log/
+*.log
+tmp/
+/match-redis/
+*.exe
+/vendor
