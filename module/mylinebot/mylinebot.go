@@ -29,8 +29,11 @@ func LineBotTemplate(events []*linebot.Event) {
 					strings.Contains(message.Text, "@botimg") ||
 					strings.Contains(message.Text, "照片")
 
+				txt := strings.Replace(message.Text, "@botimg", "", 1)
+				txt = strings.Replace(message.Text, "@bot", "", 1)
 				if isImage {
-					response, err := requestImageFromOpenAI(message.Text)
+					txt := strings.Replace(txt, "@botimg", "", 1)
+					response, err := requestImageFromOpenAI(txt)
 
 					if err != nil {
 						if _, err = clients.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(err.Error())).Do(); err != nil {
@@ -44,7 +47,7 @@ func LineBotTemplate(events []*linebot.Event) {
 					}
 					continue
 				}
-				openAIresp := requestOpenAI(message.Text)
+				openAIresp := requestOpenAI(txt)
 
 				log.Println("send message :: ", openAIresp[0:5])
 
