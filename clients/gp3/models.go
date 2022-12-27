@@ -201,10 +201,14 @@ type ImageRequest struct {
 }
 
 type ImageResponse struct {
-	Created int `json:"created"`
-
-	Data []ImageObject `json:"data"`
+	Created int           `json:"created"`
+	Errors  ErrorObject   `json:"error"`
+	Data    []ImageObject `json:"data"`
 }
 type ImageObject struct {
 	Url string `json:"url"`
+}
+
+type ErrorObject struct {
+	Message string `json:"message"`
 }

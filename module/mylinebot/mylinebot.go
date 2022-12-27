@@ -30,11 +30,16 @@ func LineBotTemplate(events []*linebot.Event) {
 					strings.Contains(message.Text, "照片")
 
 				if isImage {
-					openAIresp := requestOpenAI(message.Text)
+					response, err := requestImageFromOpenAI(message.Text)
 
+					if err != nil {
+						if _, err = clients.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(err.Error())).Do(); err != nil {
+							log.Print(err)
+						}
+					}
 					log.Println("send image ...")
 					// 回覆OpenAI回應的訊息
-					if _, err = clients.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewImageMessage(openAIresp, openAIresp)).Do(); err != nil {
+					if _, err = clients.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewImageMessage(response, response)).Do(); err != nil {
 						log.Print(err)
 					}
 					continue
@@ -69,7 +74,7 @@ func requestOpenAI(line_Message string) string {
 
 }
 
-func requestImageFromOpenAI(line_Message string) string {
+func requestImageFromOpenAI(line_Message string) (string, error) {
 	ctx := context.Background()
 
 	resp, err := clients.MyOpenAI.Image(ctx, gpt3.ImageRequest{
@@ -81,6 +86,6 @@ func requestImageFromOpenAI(line_Message string) string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return resp.Data[0].Url
+	return resp.Data[0].Url, err
 
 }

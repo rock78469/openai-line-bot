@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -375,6 +376,10 @@ func (c *client) Image(ctx context.Context, request ImageRequest) (*ImageRespons
 	}
 
 	output := ImageResponse{}
+	if len(output.Errors.Message) > 0 {
+		return nil, errors.New("unavailable")
+	}
+
 	if err := getResponseObject(resp, &output); err != nil {
 		return nil, err
 	}
