@@ -193,7 +193,7 @@ type SearchResponse struct {
 	Object string       `json:"object"`
 }
 type ImageRequest struct {
-	Prompt []string `json:"prompt"`
+	Prompt string `json:"prompt"`
 
 	Number int `json:"n"`
 

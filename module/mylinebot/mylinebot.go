@@ -32,7 +32,6 @@ func LineBotTemplate(events []*linebot.Event) {
 				txt := strings.Replace(message.Text, "@botimg", "", 1)
 				txt = strings.Replace(message.Text, "@bot", "", 1)
 				if isImage {
-					txt := strings.Replace(txt, "@botimg", "", 1)
 					response, err := requestImageFromOpenAI(txt)
 
 					if err != nil {
@@ -80,11 +79,12 @@ func requestOpenAI(line_Message string) string {
 func requestImageFromOpenAI(line_Message string) (string, error) {
 	ctx := context.Background()
 
-	resp, err := clients.MyOpenAI.Image(ctx, gpt3.ImageRequest{
-		Prompt: []string{line_Message},
+	request := gpt3.ImageRequest{
+		Prompt: line_Message,
 		Number: 1,
 		Size:   "512x512",
-	})
+	}
+	resp, err := clients.MyOpenAI.Image(ctx, request)
 
 	if err != nil {
 		log.Fatalln(err)
