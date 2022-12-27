@@ -22,5 +22,6 @@ func NewStart(r *gin.Context) {
 		}
 		return
 	}
+
 	mylinebot.LineBotTemplate(events)
 }

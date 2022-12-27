@@ -7,8 +7,13 @@ services:
       APP_NAME: ${APP_NAME:-openai-line-bot}
       APP_ENV: ${APP_ENV:-local}
       TZ: Asia/Taipei
+      NGROK_CONFIG: /etc/ngrok.yml
+    #    user: "0"
+    command: start aibot
+    volumes:
+      - ./ngrok.yml:/etc/ngrok.yml
     ports:
-      - "80:4040"
+      - "8081:4040"
     networks:
       - internal
   aibot:
@@ -19,6 +24,8 @@ services:
       dockerfile: ./Dockerfile
       args:
         APP_NAME: ${APP_NAME:-openai-line-bot}
+    ports:
+      - "8833:8833"
     environment:
       APP_NAME: ${APP_NAME:-openai-line-bot}
       APP_ENV: ${APP_ENV:-local}
