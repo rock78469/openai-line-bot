@@ -2,64 +2,52 @@ package mylinebot
 
 import (
 	"context"
-	"github.com/line/line-bot-sdk-go/linebot"
 	"log"
 	"openai-line-bot/clients"
 	gpt3 "openai-line-bot/clients/gp3"
-	"strings"
+
+	"github.com/line/line-bot-sdk-go/linebot"
 )
 
-func LineBotTemplate(events []*linebot.Event) {
-	for _, event := range events {
-		if event.Type == linebot.EventTypeMessage {
-			switch message := event.Message.(type) {
-			case *linebot.TextMessage:
-				_, err := clients.MyLineBot.GetMessageQuota().Do()
-				if err != nil {
-					log.Println("Quota err:", err)
-				}
-				log.Println("receive message :: ", message.Text)
+// CheckLineQuota - 檢查使用line是否達到限制
+func CheckLineQuota() error {
+	_, err := clients.MyLineBot.GetMessageQuota().Do()
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-				if !strings.Contains(message.Text, "@bot") {
-					log.Println("dont container @bot , just return")
-					continue
-				}
-				// 將訊息丟給OpenA
-				isImage := strings.Contains(message.Text, "圖") ||
-					strings.Contains(message.Text, "@botimg") ||
-					strings.Contains(message.Text, "照片")
-
-				txt := strings.Replace(message.Text, "@botimg", "", 1)
-				txt = strings.Replace(message.Text, "@bot", "", 1)
-				if isImage {
-					response, err := requestImageFromOpenAI(txt)
-
-					if err != nil {
-						if _, err = clients.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(err.Error())).Do(); err != nil {
-							log.Print(err)
-						}
-					}
-					log.Println("send image ...")
-					// 回覆OpenAI回應的訊息
-					if _, err = clients.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewImageMessage(response, response)).Do(); err != nil {
-						log.Print(err)
-					}
-					continue
-				}
-				openAIresp := requestOpenAI(txt)
-
-				log.Println("send message :: ", openAIresp[0:5])
-
-				if _, err = clients.MyLineBot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(openAIresp)).Do(); err != nil {
-					log.Print(err)
-				}
-
-			}
+// LineImageReply - 回傳圖片至Line Bot
+func LineImageReply(token, response string, err error) {
+	// 如果收到的訊息包含錯誤，則將錯誤訊息回傳到LineBot
+	if err != nil {
+		if _, err2 := clients.MyLineBot.ReplyMessage(token, linebot.NewTextMessage(err.Error())).Do(); err != nil {
+			log.Print("LineBot reply message fail", err2)
 		}
+	}
+
+	// 回傳圖片至Line Bot
+	if _, err = clients.MyLineBot.ReplyMessage(token, linebot.NewImageMessage(response, response)).Do(); err != nil {
+		log.Print("LineBot reply image fail", err)
 	}
 }
 
-func requestOpenAI(line_Message string) string {
+// LineImageReply - 回傳訊息至Line Bot
+func LineMessageReply(token, response string, err error) {
+	if err != nil {
+		// 如果收到的訊息包含錯誤，則將錯誤訊息回傳到LineBot
+		if _, err2 := clients.MyLineBot.ReplyMessage(token, linebot.NewTextMessage(err.Error())).Do(); err != nil {
+			log.Print("LineBot reply message fail ", err2)
+		}
+	}
+	// 回傳文字訊息至Line Bot
+	if _, err = clients.MyLineBot.ReplyMessage(token, linebot.NewTextMessage(response)).Do(); err != nil {
+		log.Print("LineBot reply message fail ", err)
+	}
+}
+
+func RequestOpenAI(line_Message string) (string, error) {
 	ctx := context.Background()
 
 	resp, err := clients.MyOpenAI.CompletionWithEngine(ctx, "text-davinci-003", gpt3.CompletionRequest{
@@ -72,11 +60,10 @@ func requestOpenAI(line_Message string) string {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return resp.Choices[0].Text
-
+	return resp.Choices[0].Text, err
 }
 
-func requestImageFromOpenAI(line_Message string) (string, error) {
+func RequestImageFromOpenAI(line_Message string) (string, error) {
 	ctx := context.Background()
 
 	request := gpt3.ImageRequest{
